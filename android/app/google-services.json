@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "707025192557",
+    "firebase_url": "https://kingoka-91211.firebaseio.com",
+    "project_id": "kingoka-91211",
+    "storage_bucket": "kingoka-91211.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707025192557:android:a5b72bc3910214addbe164",
+        "android_client_info": {
+          "package_name": "com.xpressglobe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "707025192557-t23mlcb0o383va352mo17uljf6rgh8a7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDD8l6PNzY40sQNVzDHKgcM0X4Blm5TGkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "707025192557-t23mlcb0o383va352mo17uljf6rgh8a7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
