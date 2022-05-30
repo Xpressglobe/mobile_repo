@@ -61,6 +61,8 @@ export default class SendContacts extends Component {
                     headers,
                 });
             const getCustomer = await CustomerApiCall.json();
+
+            
            
             this.setState({customerList: getCustomer.data, spinner: false},
 

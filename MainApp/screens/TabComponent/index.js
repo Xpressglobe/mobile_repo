@@ -7,7 +7,7 @@ import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
 
 import HomeScreen from './HomeScreen';
 import TransferScreen from './Transaction';
-import Formula from '../Formula';
+// import Formula from '../Formula';
 import ProfileScreen from './ProfileScreen';
 
 const TabNav = createBottomTabNavigator({
@@ -33,7 +33,7 @@ const TabNav = createBottomTabNavigator({
     },
 
     Formula: {
-        screen: Formula,
+        screen: ProfileScreen,
         navigationOptions: {
             tabBarLabel: "Formula",
             tabBarIcon: ({ tintColor }) => (

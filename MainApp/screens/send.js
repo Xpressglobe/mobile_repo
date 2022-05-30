@@ -5,7 +5,7 @@ import Theme from '../styles/Theme';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Constant from "../components/Constant";
 import AsyncStorage from '@react-native-community/async-storage';
-import ReactDOM from "react-dom";
+// import ReactDOM from "react-dom";
 import {TextInputMask} from 'react-native-masked-text'
 import {SCLAlert,SCLAlertButton} from 'react-native-scl-alert'
 

@@ -66,7 +66,7 @@ AsyncStorage.getAllKeys()
                                 </View>
                             </TouchableOpacity>
                         </View> */}
-                        {/* <View style={{ paddingLeft: 35, paddingVertical: 10, }}>
+                        <View style={{ paddingLeft: 35, paddingVertical: 10, }}>
                             <TouchableOpacity onPress={() => this.props.navigation.navigate("SwitchWallet",
                             { c_type: 1 }
                             )}>
@@ -78,7 +78,7 @@ AsyncStorage.getAllKeys()
                                     <Icon family="MaterialIcons" name="keyboard-arrow-right" size={30} color="black" />
                                 </View>
                             </TouchableOpacity>
-                        </View> */}
+                        </View>
 
                         {/* <View style={{ paddingLeft: 35, paddingVertical: 10, }}>
                             <TouchableOpacity onPress={() => this.props.navigation.navigate("SwitchWallet",

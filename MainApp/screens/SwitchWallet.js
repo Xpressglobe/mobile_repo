@@ -22,14 +22,28 @@ export default class SwitchWallet extends Component {
     }
 
     async componentDidMount() {
-        this.setState({ personal_info_id: await AsyncStorage.getItem('@personal_info_id')}); 
+        this.setState({ personal_info_id: await AsyncStorage.getItem('@personal_info_id'),
+        getFrom: await AsyncStorage.getItem('@getFrom'),
+        token: await AsyncStorage.getItem("@token"),
+    }); 
        
         try {
+
+            const headers = {
+                "Authorization": "Bearer "+ this.state.token,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            };
+
    
-            const CustomerApiCall = await fetch(Constant.URL+Constant.getCOUNTRY);
+            const CustomerApiCall = await fetch(Constant.URL+Constant.getCOUNTRY,
+                {
+                    method: "GET",
+                    headers,
+                });
             const getCustomer = await CustomerApiCall.json();
-           
-            this.setState({customerList: getCustomer, spinner: false});
+            console.log(getCustomer)
+            this.setState({customerList: getCustomer.data, spinner: false});
         } catch(err) {
             console.log("Error fetching data-----------", err);
         }
@@ -43,7 +57,7 @@ export default class SwitchWallet extends Component {
                 country_id: rowdata.item.country_id,
                 currency: rowdata.item.currency,
                 country: rowdata.item.country,
-                c_type:this.state.c_type
+                // c_type:rowdata.item.dial_code
               
               })} >
                 <View style={styles.transferbox}>
@@ -53,13 +67,13 @@ export default class SwitchWallet extends Component {
                         </View>
                         <View style={styles.flexrow}>
                             <View style={styles.userdetails}>
-                                <Text style={{fontSize: 15,color: '#000',fontFamily: 'Poppins-Light'}}>{rowdata.item.currency}</Text>
-                                <Text style={{ fontSize: 20, color: '#000', fontFamily: 'Poppins-Thin' }}>{rowdata.item.country}</Text>
+                                <Text style={{fontSize: 13,color: '#000',fontFamily: 'Poppins-Light'}}>{rowdata.item.currency}</Text>
+                                <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Thin' }}>{rowdata.item.country}</Text>
                             </View>
                         </View>
                         <View style={styles.paymentsty}>
                            
-                            <Text style={styles.debited}>{rowdata.item.cur_x}</Text>
+                            <Text style={styles.debited}>{rowdata.item.currencies.length}</Text>
                         </View>
                     </View>
                 </View>
