@@ -50,11 +50,18 @@ export default class Send extends Component {
             MarkUpSettingList: [],
             RateSettingList: [],
             Smessage:"",Amessage:"",
-            rate_setting: "",
+            rate_setting: 0,
             mutiply: [], division: [],
             mode_payment:"",
-            dollar_rate: 1,
+            dollar_rate: 0,
             percentage_id: '',
+            percentage: 0,
+            currency_id: '',
+            range3: '',
+            range4: '',
+            r_a_mount:1,
+            r_amount_real: '',
+            amount_real: ''
 
         }
 
@@ -71,8 +78,7 @@ export default class Send extends Component {
 
         });
 
-        console.log( this.props.navigation.getParam('date',''),)
-
+       
         const headers = {
             "Authorization": "Bearer "+ this.state.token,
             "Content-Type": "application/json",
@@ -110,6 +116,22 @@ export default class Send extends Component {
         } catch (err) {
             console.log("Error fetching data-----------",err);
         }
+
+
+        try {
+
+            const BeneficiaryApiCall = await fetch(Constant.URL + "beneficiaries?customer_id" + this.state.customer_id,
+            {
+                method: "GET",
+                headers,
+            });
+            const getBen = await BeneficiaryApiCall.json();
+           
+            this.setState({BenList: getBen.data,spinner: false});
+        } catch (err) {
+            console.log("Error fetching data-----------",err);
+        }
+
 
     
     }
@@ -163,17 +185,19 @@ export default class Send extends Component {
                 "Accept": "application/json",
             };
 
-            const MarkSettingApiCall = await fetch(Constant.URL + Constant.getPecentageRate 
+            const percentageApiCall = await fetch(Constant.URL + "settings/percentages" 
                 + "?from_country=" + this.state.getFrom + "&to_country=" + this.state.to_country_id
                 + "?currency_from=" + country_id + "&currency_to=" + currency + "&transaction_type=send",
             {
                 method: "GET",
                 headers,
             });
-            const getMarkUp = await MarkSettingApiCall.json();
+            const getMarkUp = await percentageApiCall.json();
 
             //rate list
             var rate_ = this.state.cc_type== "direct" ? 0 : 1;
+
+            console.log(rate_);
            
             const RateListApiCall = await fetch(Constant.URL + "settings/rates" 
                 + "?country_id_from=" + this.state.getFrom + "&country_id_to=" + this.state.to_country_id
@@ -184,10 +208,12 @@ export default class Send extends Component {
             });
             const getRateList = await RateListApiCall.json();
 
-            console.log("hsdjhsdjhsd", getRateList.data);
+          
+
+            // console.log("hsdjhsdjhsd", getMarkUp.data);
             if(getRateList.data.length > 0){
 
-                this.getRange( getRateList.data[getRateList.data.length - 1].rate_set_id);
+                this.getRange( getRateList.data[getRateList.data.length - 1].rate_set_id, 1);
                 // console.log("hsdjhsdjhsd", getRateList.data[getRateList.data.length - 1].rate_set_id);
             }else{
                 this.setState({ RateSettingList: [], spinner: false,Sshow: true ,Amessage:"No rate settings found! COntact Administrator" });
@@ -196,8 +222,6 @@ export default class Send extends Component {
             if(getMarkUp.data.length > 0){
                 // console.log("yuhuhyduisd",getMarkUp.data[0].Percent_setting_id)
                 this.setState({percentage_id: getMarkUp.data[0].Percent_setting_id, percentage: getMarkUp.data[0].percentage, percentage_real:  getMarkUp.data[0].percentage,  limit_type: getMarkUp.data[0].limit_type,spinner: false});
-            }else{
-                this.setState({ RateSettingList: [], spinner: false,Sshow: true ,Amessage:"No rate settings found for currency pair" });
             }
            
         } catch (err) {
@@ -206,8 +230,31 @@ export default class Send extends Component {
 
     }
 
+    async getDollar(){
+          if(this.state.cc_type == "dollar"){
 
-    async getRange(rate_set_id){
+                const DollarRateApiCall = await fetch(Constant.URL + "settings/rates/" 
+              + rate_set_id +  "/compute-dollar-rate?id="+ rate_set_id + "&rate=" + this.state.rate_setting + "&rate_type=" + r_t + "&base_conversion=" + this.state.dollar_rate,
+            {
+                method: "GET",
+                headers,
+            });
+
+            console.log(Constant.URL + "settings/rates/" 
+            + rate_set_id +  "/compute-dollar-rate?id="+ rate_set_id + "&rate=" + this.state.rate_setting + "&rate_type=" + r_t + "&base_conversion=10" )
+            const getDRate = await DollarRateApiCall.json();
+
+           
+            if(getDRate){
+                console.log(getDRate);
+            this.setState({dollar_rate: getDRate.data.dollar_rate});
+            }
+
+            }
+    }
+
+
+    async getRange(rate_set_id, r_t){
         // console.log("usuiusd",rate_set_id);
         try {
 
@@ -224,37 +271,29 @@ export default class Send extends Component {
             };
            
             const RangeSettingApiCall = await fetch(Constant.URL + "settings/rates/" 
-              + rate_set_id +  "/retrieve-rates-and-ranges",
+              + rate_set_id +  "/retrieve-rates-and-ranges?rate_type=" + r_t,
             {
                 method: "GET",
                 headers,
             });
             const getBaseRate = await RangeSettingApiCall.json();
 
-            if(this.state.cc_type == "dollar"){
-
-                const DollarRateApiCall = await fetch(Constant.URL + "settings/rates/" 
-              + rate_set_id +  "/compute-dollar-rate",
-            {
-                method: "GET",
-                headers,
-            });
-            const getDRate = await DollarRateApiCall.json();
-
-           
-            if(getDRate){
-                // console.log(getDRate.data.dollar_rate);
-            this.setState({dollar_rate: getDRate.data.dollar_rate});
-            }
-
-            }
+          
 
 
-            console.log(getBaseRate.data.rate_range);
+            console.log(getBaseRate.data);
             if(getBaseRate.data){
+                if(this.state.cc_type == "dollar"){
+                    this.setState({rate_set_id: rate_set_id, range1: getBaseRate.data.rate_range[0], range2: getBaseRate.data.rate_range[1],
+                        range3: getBaseRate.data.base_conversion_range[0], range4: getBaseRate.data.base_conversion_range[1],spinner: false});
+                  
+                }else{
+                    this.setState({rate_set_id: rate_set_id, range1: getBaseRate.data.rate_range[0], range2: getBaseRate.data.rate_range[1],
+                      spinner: false});
+                  
+                }
                
-                this.setState({rate_set_id: rate_set_id, range1: getBaseRate.data.rate_range[0], range2: getBaseRate.data.rate_range[1],spinner: false});
-              
+            
             }else{
                 this.setState({spinner: false,Sshow: true ,Amessage:"No rate settings found for currency pair" });
             }
@@ -263,6 +302,28 @@ export default class Send extends Component {
             console.log("Error fetching data-----------",err);
         }
 
+    }
+
+    async calSum(amt, value){
+      var amount_real, r_amount_real = 0;  
+      
+      if(value == 1){
+        r_amount_real = Constant.rawNumber(amt) / this.state.rate_setting
+      
+        amount_real = r_amount_real.toFixed(2) * this.state.rate_setting
+      }else{
+        r_amount_real = Constant.rawNumber(amt)
+      
+        amount_real = Constant.rawNumber(amt) * this.state.rate_setting
+
+        
+      }
+      
+      
+     
+     
+
+      this.setState({r_amount_real: r_amount_real.toFixed(2),amount_real: amount_real });
     }
 
 
@@ -274,13 +335,13 @@ export default class Send extends Component {
             Alert.alert("Rate is outside the range");
             return false
         }
-
+// console.log(this.state.rate_type);
 
         this.props.navigation.navigate('SendPaymentMode',
         {  
             date: this.state.date,
-            trans_type: this.state.trans_type,
-            cc_type: this.state.cc_type == "direct" ? 0 : 1,
+            setting_type: this.state.cc_type,
+            trans_type: this.state.rate_type,
             customer_id: this.state.customer_id,
             country_id: this.state.getFrom,
             country_id_to: this.state.to_country_id,
@@ -290,13 +351,15 @@ export default class Send extends Component {
             cur_from: this.state.currencyFrom,
             cur_to: this.state.currency_id,
             amount: this.state.amount,
+            amount_real: this.state.amount_real,
+            r_amount_real: this.state.r_amount_real,
             percentage: this.state.percentage,
             charges: this.state.charges,
             cal_type: this.state.cal_type,
             cus_name: this.state.cus_name,
             cus_phone: this.state.cus_phone,
             dollar_rate : this.state.dollar_rate,
-            rate_setting: this.state.rate_setting,
+            rate: this.state.rate_setting,
 
 
 
@@ -396,111 +459,15 @@ export default class Send extends Component {
                         </View>
                       ) : null} 
 
-                     {this.state.to_country_id != 0 ? (
-                <View style={{margin: 15,marginTop: 2,paddingHorizontal: 0}}>
-                  <View style={{flexDirection: 'row',alignItems: 'center',borderWidth: 1,margin: 0,marginTop: 2,paddingHorizontal: 15}}>
-                  <Text >Amount</Text>
-                  <TextInputMask style={{paddingLeft: 10,fontSize: 16}}
-                      type={'money'}
-                      placeholder="Amount"
-                      options={{
-                          precision: 2,
-                          separator: '.',
-                          delimiter: ',',
-                          unit: '',
-                          suffixUnit: ''
-                      }}
-                      value={this.state.amount}
-                      onChangeText={text => {
-                         
-                            this.setState({
-                                amount: text
-                              })
-                        
-                          
-                      }}
-                      ref={(ref) => this.rateV = ref}
-                  />
-                  {/* {this.state.bal */}
-                 
-              </View>
-              {Constant.rawNumber(this.state.amount) > this.state.bal ? (
-              <Text style={{color: 'red'}} > Amount is more than availabe balance</Text>
-               ) : null} 
-              </View>
-                      ) : null}
 
-
-{this.state.to_country_id != 0 ? (
-                <View style={{margin: 15,marginTop: 2,paddingHorizontal: 0}}>
-                  <View style={{flexDirection: 'row',alignItems: 'center',borderWidth: 1,margin: 0,marginTop: 2,paddingHorizontal: 15}}>
-                  <Text >Percentage setting</Text>
-                  <TextInput
-                                style={{ flex: 0.9, paddingLeft: 20 }}
-                                placeholder="%"
-                                keyboardType="name-phone-pad"
-                                onChangeText={text => {
-                                   if(this.state.limit_type == "below" ){
-                                        console.log(text)
-                                        // console.log("bbbb", this.state.percentage_real)
-                                        if(text > this.state.percentage_real){
-                                            console.log("bellow")
-                                            this.setState({
-                                                percentage: this.state.percentage_real
-                                              })
-                                        }else{
-                                            this.setState({
-                                                percentage: text
-                                              })
-                                        }
-                                    } else if(this.state.limit_type == "above"){
-                                        if(text < this.state.percentage_real){
-                                            this.setState({
-                                                percentage: this.state.percentage_real
-                                              })
-                                        }else{
-                                            this.setState({
-                                                percentage: text
-                                              })
-                                        }
-                                    }else{
-                                        this.setState({
-                                            percentage: text
-                                          })
-                                    }
-                                   
-                                }}
-                                value={this.state.percentage }
-                                
-                            />
-                 
-              </View>
-              {/* {Constant.rawNumber(this.state.amount) > this.state.bal ? ( */}
-              <Text style={{color: 'grey'}} > Range {this.state.percentage}% and {this.state.limit_type} </Text>
-               {/* ) : null}  */}
-              </View>
-                      ) : null}
-
-{Constant.rawNumber(this.state.amount) >= 1 && Constant.rawNumber(this.state.amount) < this.state.bal ? (
-<View>                      
-<View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 15, paddingHorizontal: 15 }}>
-<Text>Amount :  {this.state.currencyFrom}  {Constant.numberFormate(Constant.rawNumber(this.state.amount))} </Text>
-</View>
-{/* {new Intl.NumberFormat().format(this.state.amount)} */}
-<View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 0, paddingHorizontal: 15 }}>
-<Text>Charges : {this.state.currencyFrom} {Constant.numberFormate(Constant.rawNumber(this.state.amount) * (this.state.percentage/100))}   </Text>
-</View>
-</View>
-) : null}
-
-{Constant.rawNumber(this.state.amount) >= 1 && Constant.rawNumber(this.state.amount) < this.state.bal ? (
+{this.state.currency_id != "" && this.state.bal > 0 ? (
                         <View style={{flexDirection: 'row',alignItems: 'center',borderWidth: 1,margin: 15,marginTop: 2,paddingHorizontal: 15}}>
                             <Text style={{flex: 0.1,paddingLeft: 1}} ></Text>
                             <Picker style={{flex: 0.9,paddingLeft: 150}}
                                 selectedValue={this.state.cal_type}
                                 onValueChange={(itemValue,itemPosition) => {
                                     this.setState({cal_type: itemValue,toIndex: itemPosition})
-                                    // this.onChargersGet(itemValue)
+                                    this.getRange(this.state.rate_set_id, itemValue)
 
                                 }}   >
                                 <Picker.Item label="CALCULATOR TYPE" value="" />
@@ -511,9 +478,7 @@ export default class Send extends Component {
                         </View>
                     ) : null}
 
-
-                        
-
+                    
 {this.state.cal_type != "" ? (
     <View>
 <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 15, paddingHorizontal: 15 }}>
@@ -557,8 +522,8 @@ export default class Send extends Component {
                         <View style={{marginLeft: 15, marginTop: -10,  }}>
                       
                             <View>
-                        <Text>Range : 0 - 0 </Text>
-                        {this.state.rate_setting <  this.state.range1  ||  this.state.rate_setting >  this.state.range2 ? (
+                            <Text>Range : { this.state.range3 } - { this.state.range4 } </Text>
+                        {this.state.dollar_rate <  this.state.range3  ||  this.state.dollar_rate >  this.state.range4 ? (
                         <Text style={{ color: '#ff0000'  }}>Rate is outside the range</Text>
                         ) : null}
                         </View>
@@ -570,8 +535,140 @@ export default class Send extends Component {
 
                         </View>
                           ) : null}
-                        {this.state.rate_setting != "" ? (
-                        // <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 15, paddingHorizontal: 15 }}>
+
+{this.state.to_country_id != 0 &&  this.state.percentage_real != 0 ? (
+                <View style={{margin: 15,marginTop: 2,paddingHorizontal: 0}}>
+                  <View style={{flexDirection: 'row',alignItems: 'center',borderWidth: 1,margin: 0,marginTop: 2,paddingHorizontal: 15}}>
+                  <Text >Percentage setting</Text>
+                  <TextInput
+                                style={{ flex: 0.9, paddingLeft: 20 }}
+                                placeholder="%"
+                                keyboardType="name-phone-pad"
+                                onChangeText={text => {
+                                   if(this.state.limit_type == "below" ){
+                                        console.log(text)
+                                        // console.log("bbbb", this.state.percentage_real)
+                                        if(text > this.state.percentage_real){
+                                           
+                                            this.setState({
+                                                percentage: this.state.percentage_real
+                                              })
+                                        }else{
+                                            this.setState({
+                                                percentage: text
+                                              })
+                                        }
+                                    } else if(this.state.limit_type == "above"){
+                                        if(text < this.state.percentage_real){
+                                            this.setState({
+                                                percentage: this.state.percentage_real
+                                              })
+                                        }else{
+                                            this.setState({
+                                                percentage: text
+                                              })
+                                        }
+                                    }else{
+                                        this.setState({
+                                            percentage: text
+                                          })
+                                    }
+                                   
+                                }}
+                                value={this.state.percentage }
+                                
+                            />
+                 
+              </View>
+              {/* {Constant.rawNumber(this.state.amount) > this.state.bal ? ( */}
+              <Text style={{color: 'grey'}} > Range {this.state.percentage}% and {this.state.limit_type} </Text>
+               {/* ) : null}  */}
+              </View>
+                      ) : null}
+
+
+                          {this.state.rate_setting != ""  ? (
+                            <View style={{flexDirection: 'row',alignItems: 'center',borderWidth: 1,margin: 15,marginTop: 15,paddingHorizontal: 15}}>
+                                <Text style={{flex: 0.1,paddingLeft: 1}} ></Text>
+                                <Picker style={{flex: 0.9,paddingLeft: 150}}
+                                    selectedValue={this.state.r_a_mount}
+                                    onValueChange={(itemValue,itemPosition) => {
+                                       
+                                        this.calSum(this.state.amount, itemValue)
+                                        this.setState({r_a_mount: itemValue,toIndex: itemPosition})
+                                       
+    
+                                    }}   >
+                                  <Picker.Item label="Amount" value="1" />
+                                    <Picker.Item label="Recipient Amount" value="2" />
+                                   
+                                </Picker>
+                            </View>
+                        ) : null}
+
+                      
+                     {this.state.rate_setting != "" ? (
+                <View style={{margin: 15,marginTop: 15,paddingHorizontal: 0}}>
+                  <View style={{flexDirection: 'row',alignItems: 'center',borderWidth: 1,margin: 0,marginTop: 2,paddingHorizontal: 15}}>
+                  <Text >{this.state.r_a_mount == 1 ? "Amount" : 'Receipient Amount'}</Text>
+                  <TextInputMask style={{paddingLeft: 10,fontSize: 16}}
+                      type={'money'}
+                      placeholder={this.state.r_a_mount == 1 ? "Amount" : 'Receipient Amount'}
+                      options={{
+                          precision: 2,
+                          separator: '.',
+                          delimiter: ',',
+                          unit: '',
+                          suffixUnit: ''
+                      }}
+                      value={this.state.amount}
+                      onChangeText={text => {
+                        this.calSum(text, this.state.r_a_mount)
+                            this.setState({
+                                amount: text
+                              })
+                       
+                          
+                      }}
+                      ref={(ref) => this.rateV = ref}
+                  />
+                  {/* {this.state.bal */}
+                 
+              </View>
+              {Constant.rawNumber(this.state.amount) > this.state.bal ? (
+              <Text style={{color: 'red'}} > Amount is more than availabe balance</Text>
+               ) : null} 
+              </View>
+                      ) : null}
+
+
+
+
+
+
+{Constant.rawNumber(this.state.r_amount_real) != "" && Constant.rawNumber(this.state.amount) < this.state.bal ? (
+<View>                      
+<View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 15, paddingHorizontal: 15 }}>
+<Text>Amount :  {this.state.currencyFrom}  {Constant.numberFormate(this.state.amount_real)} </Text>
+</View>
+<View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 1, paddingHorizontal: 15 }}>
+<Text>Recipient Amount :  {this.state.currency_id} {Constant.numberFormate(this.state.r_amount_real)}    </Text>
+</View>
+{/* {new Intl.NumberFormat().format(this.state.amount)} */}
+
+<View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 0, paddingHorizontal: 15 }}>
+<Text>Charges : {this.state.currencyFrom} {(this.state.amount_real * (this.state.percentage/100))}   </Text>
+</View>
+</View>
+) : null}
+
+
+
+
+                        
+
+                        {/* {this.state.rate_setting != "" ? ( */}
+                        {/* // <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 15, paddingHorizontal: 15 }}>
                         //     <TextInput
                         //         style={{ flex: 0.9, paddingLeft: 20 }}
                         //         placeholder="RECIPIENT AMOUNT"
@@ -581,12 +678,12 @@ export default class Send extends Component {
                         //         value={this.state.amount}
                         //     />
                           
-                        // </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 25, paddingHorizontal: 15 }}>
-<Text>Recipient Amount :  {this.state.currency_id}  { this.state.cc_type == "dollar" ? Constant.numberFormate(Constant.rawNumber(this.state.amount) * (this.state.dollar_rate)) 
-                                : Constant.numberFormate(Constant.rawNumber(this.state.amount) * (this.state.rate_setting))}   </Text>
-</View>
-                         ) : null}
+                        // </View> */}
+{/* //                         <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, marginTop: 25, paddingHorizontal: 15 }}>
+// <Text>Recipient Amount :  {this.state.currency_id}  { this.state.cc_type == "dollar" ? Constant.numberFormate(Constant.rawNumber(this.state.amount) * (this.state.dollar_rate)) 
+//                                 : Constant.numberFormate(Constant.rawNumber(this.state.amount) * (this.state.rate_setting))}   </Text>
+// </View>
+//                          ) : null} */}
 
 
 

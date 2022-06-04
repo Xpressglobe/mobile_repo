@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import {SCLAlert,SCLAlertButton} from 'react-native-scl-alert'
 import {connect} from "react-redux";
+import RNRestart from 'react-native-restart';
 
 
 
@@ -25,7 +26,8 @@ import {connect} from "react-redux";
             c_type : this.props.navigation.getParam('c_type', '0'),
             spinner: false,
             bal:"0.00",
-            show: false,
+            Ashow: false,
+            Sshow:false,
             pin:"",
             Amessage:"",p_status:2,personal_info_id:0,
             Smessage:"",
@@ -38,7 +40,7 @@ import {connect} from "react-redux";
         
         this.setState({ 
             personal_info_id: await AsyncStorage.getItem('@personal_info_id')  });
-            this.country_status()
+            // this.country_status()
     
     }
 
@@ -47,14 +49,45 @@ import {connect} from "react-redux";
         this.setState({ spinner: true });
         try {
 
-            const BalApiCall = await fetch(Constant.URL + Constant.getAgBal + "/" + this.state.personal_info_id+"/"+this.state.country_id+"/"+this.state.p_status);
+
+            this.setState({
+                personal_info_id: await AsyncStorage.getItem('@personal_info_id'),
+                getCurrency: await AsyncStorage.getItem('@getCurrency'),
+                getFrom: await AsyncStorage.getItem('@getFrom'),
+                token: await AsyncStorage.getItem("@token"),
+    
+    
+            });
+    
+            
+            const headers = {
+                "Authorization": "Bearer "+ this.state.token,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            };
+
+            const BalApiCall = await fetch(Constant.URL + "users/" + this.state.personal_info_id,
+            {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify({
+                    wallet_country_id: this.state.country_id,
+                })
+            });
             const dataSource = await BalApiCall.json();
-            await AsyncStorage.setItem('@wallet', dataSource.bal)
-            console.log("kd",dataSource.bal)
-            this.props.getCustomerWallet(dataSource.c_bal)
-            this.props.getAgentWallet(dataSource.bal)
-            this.props.getAgentCurrency(this.state.currency)
-            this.setState({ wallet: dataSource.bal, c_wallet: dataSource.c_bal, spinner: false });
+            console.log("kd",dataSource.message)
+           
+            if(dataSource.message == "Update succeeded"){
+                await AsyncStorage.setItem('@getFrom', this.state.country_id.toString())
+                await AsyncStorage.setItem('@getCurrency', this.state.currency)     
+                this.setState({ spinner: false,Sshow: true ,Smessage:dataSource.message });
+
+                RNRestart.Restart();
+            }else{
+                this.setState({ spinner: false,Ashow: true ,Amessage:dataSource.message });
+            }
+            
+            // this.setState({ spinner: false, show: true, Amessage: "The selected pin is invalid!" });
         } catch (err) {
             console.log("Error fetching data-----------", err);
             this.setState({ spinner: false });
@@ -102,13 +135,12 @@ import {connect} from "react-redux";
         this.setState({ show: true })
         if(Constant.removeAsyncValue('getFrom') &&  Constant.removeAsyncValue('getCurrency')){
        
-        await AsyncStorage.setItem('@getFrom', this.state.country_id)
-       await AsyncStorage.setItem('@getCurrency', this.state.currency)
+        
         this.bal()
         
-         this.setState({ spinner: false,Sshow: true ,Smessage:"Wallet Currecy has been changed successfully" });
+        
         }else{
-            this.setState({ spinner: false,Ashow: true ,show: false,Amessage:"Unable to make changes, please try again" });
+            this.setState({ spinner: false,Ashow: true ,Amessage:"Unable to make changes, please try again" });
         }
           
       }
@@ -137,14 +169,8 @@ import {connect} from "react-redux";
                     <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
                         <Icon family="MaterialIcons" name="arrow-back" size={25} color="#FFF" />
                     </TouchableOpacity>
-                    {this.state.c_type == 1 ? (
-        
-                    <Text style={styles.headTxt}>Confirm Switch Wallet To  {this.state.currency} </Text>
-                    ):null}
-                      {this.state.c_type == 2 ? (
-        
-                    <Text style={styles.headTxt}>Activate  Wallet from  {this.state.currency} </Text>
-                            ):null}
+                    <Text style={styles.headTxt}>Confirm Switch Country </Text>
+                   
                 </View>
                 <ScrollView>
                     <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: 'lightgray', alignItems: 'center' }}>
@@ -166,12 +192,10 @@ import {connect} from "react-redux";
                     <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 20 , paddingTop:10}}  >
                         
                     </TouchableOpacity>
-                    {this.state.c_type == 1 ? (
-                <View>
+  <View>
                     <View style={{  alignItems: 'center', margin: 15, paddingHorizontal: 15}}>
                         <Text style={{marginTop:1,color:"red", fontSize: 18}}>
-                        I UNDERSTAND THAT SWITCHING MY WALLET WILL CHANGE MY DEFAULT WALLET CURRENCY , COUNTRY AND CUSTOMER UNDER MY ACCOUNT. 
-                        </Text>
+                     DO YOU REALLY WANT TO SWITCH THIS COUNTRY   </Text>
                         <Text style={{marginTop:15,color:"#000"}}>
                        YOU CAN SWITCH BACK TO YOUR DEFAULT ACCOUNT AT ANY TIME 
                         </Text>
@@ -180,10 +204,10 @@ import {connect} from "react-redux";
 
             
                     <TouchableOpacity style={{ paddingVertical: 10, backgroundColor: '#020cab', marginTop: 30, borderRadius: 50, marginHorizontal: 30 }} onPress={this.handleOpen}  >
-                        <Text style={{ color: '#FFF', textAlign: 'center', fontSize: 16 ,  fontFamily: 'Poppins-Bold',}}>CONFIRM WALLET SWITCH</Text>
+                        <Text style={{ color: '#FFF', textAlign: 'center', fontSize: 16 ,  fontFamily: 'Poppins-Bold',}}>CONFIRM SWITCH COUNTRY</Text>
                     </TouchableOpacity>
                 </View>
-                    ):null}
+                   
 
 {this.state.c_type == 2? (
                 <View>

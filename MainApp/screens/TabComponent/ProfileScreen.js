@@ -73,7 +73,7 @@ AsyncStorage.getAllKeys()
                                 <View style={styles.settingLayout}>
                                     <View style={styles.settingNamesty}>
                                         <Icon family="FontAwesome" name="money" size={30} color={Theme.mainColor} />
-                                        <Text style={styles.meunSty}>Switch Wallet </Text>
+                                        <Text style={styles.meunSty}>Switch Country </Text>
                                     </View>
                                     <Icon family="MaterialIcons" name="keyboard-arrow-right" size={30} color="black" />
                                 </View>

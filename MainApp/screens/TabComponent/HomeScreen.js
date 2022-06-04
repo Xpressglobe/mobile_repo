@@ -66,6 +66,7 @@ class HomeScreen extends Component {
 
 let token=   await AsyncStorage.getItem("@token");
 let currency=   await AsyncStorage.getItem("@getCurrency");
+let dail_code=   await AsyncStorage.getItem("@dial_code");
 console.log("nice ",currency);
         this.setState({ spinner: true,
          });
@@ -77,8 +78,6 @@ console.log("nice ",currency);
                 "Accept": "application/json",
             };
 
-           
-
           
       
               
@@ -88,7 +87,7 @@ console.log("nice ",currency);
                       headers,
                   }).then(response => response.json()).then((result) => {
             
-                    console.log("allrest",result.data);
+                    console.log("allrest",result);
       
                     // const dataSourc = await BalApiCall.json();
       
@@ -259,7 +258,7 @@ console.log("nice ",currency);
                                     <Text style={styles.paytypesty}>Customer</Text>
                                 </TouchableOpacity>
                             </View>
-                            <View style={{ flex: 0.5, margin: 10 }}>
+                            {/* <View style={{ flex: 0.5, margin: 10 }}>
                               
                                 <TouchableOpacity onPress={() => this.props.navigation.navigate("RateCenter")}>
                                     <LinearGradient colors={['#fc0f84', '#020cab']}
@@ -272,13 +271,13 @@ console.log("nice ",currency);
                                     </LinearGradient>
                                     <Text style={styles.paytypesty}>Rate Center</Text>
                                 </TouchableOpacity>
-                            </View>
+                            </View> */}
 
                         </View>
                     </View>
 
 
-                    <View style={[styles.transferbox2, { marginTop: -2 }]}>
+                    {/* <View style={[styles.transferbox2, { marginTop: -2 }]}>
 
                         <View style={{ flex: 1, flexDirection: "row" }}>
                             <View style={{ flex: 0.5, margin: 10 }}>
@@ -325,7 +324,7 @@ console.log("nice ",currency);
                                 <Text style={styles.paytypesty}>Pending Payout</Text>
                             </TouchableOpacity>
                         </View>
-                            {/* <View style={{ flex: 0.5, margin: 10 }}>
+                            <View style={{ flex: 0.5, margin: 10 }}>
                                 <TouchableOpacity onPress={() => this.props.navigation.navigate("", {
                                     history: 1,
                                 })}>
@@ -369,10 +368,10 @@ console.log("nice ",currency);
                                     <Text style={styles.paytypesty}>Payment</Text>
                                 </TouchableOpacity>
                                
-                            </View> */}
+                            </View>
 
                         </View>
-                    </View>
+                    </View> */}
 
                     {/* <View style={[styles.transferbox2, { marginTop: -2 }]}>
 

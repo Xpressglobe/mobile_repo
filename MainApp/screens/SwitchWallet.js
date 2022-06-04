@@ -94,7 +94,7 @@ export default class SwitchWallet extends Component {
                         <Icon family="MaterialIcons" name="arrow-back" size={25} color="#FFF" />
                     </TouchableOpacity>
                     {this.state.c_type == 1 ? ( 
-        <Text style={styles.headTxt}>Switch Wallet </Text>
+        <Text style={styles.headTxt}>Switch Country </Text>
         ): null}
 
 {this.state.c_type == 2 ? ( 

@@ -272,7 +272,7 @@ console.log("result:", result);
                                 style={{ flex: 0.9, paddingLeft: 20 }}
                                 placeholder="Add Depositor Details"
                                 keyboardType="name-phone-pad" 
-                                onChangeText={(cus_adr)=>this.setState({depositor_detail})}
+                                onChangeText={(depositor_detail)=>this.setState({depositor_detail})}
                                 value={this.state.depositor_detail}
                             />
                           
@@ -288,7 +288,7 @@ console.log("result:", result);
                             placeholder="Pin "
                            
                             secureTextEntry={true}
-                            maxLength={16}
+                            maxLength={4}
                             onChangeText={(pin)=>this.setState({pin})}
                             value={this.state.pin}
                             />
