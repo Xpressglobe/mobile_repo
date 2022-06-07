@@ -84,7 +84,7 @@ export default class SplashScreen extends Component {
                     });
                     
                     let getUser1= await UsersApiCall.json();
-                    console.log(getUser1);
+                    // console.log(getUser1);
                     this.setState({dataSource: getUser1});
                 } catch(err) {
                     console.log("Error fetching data-----------", err);
@@ -105,11 +105,11 @@ export default class SplashScreen extends Component {
                       headers,
                   }).then(response => response.json()).then((result) => {
               
-                    console.log("sdszasssssd", result.data[0]);
+                   
                     // this.props.getAgentCurrency(result.data[0])
                     this.setState({ getCurrency: result.data[0], spinner: false });
                     Constant.SetAsyncValue('@getCurrency', result.data[0]);
-               
+                    // console.log("sdszasssssd", this.state.dataSource.data.wallet_country.dial_code);
                  
                      Constant.SetAsyncValue('@isLoggedIn', '1'),
                      Constant.SetAsyncValue('@email', this.state.dataSource.data.email),
@@ -124,11 +124,11 @@ export default class SplashScreen extends Component {
                      Constant.SetAsyncValue('@getFrom', this.state.dataSource.data.wallet_country_id.toString()),
                     
                     //  Constant.SetAsyncValue('@profit_rate', this.state.dataSource.data.profit_rate)
-                     Constant.SetAsyncValue('@dial_code', this.state.dataSource.data.country.dial_code)
+                     Constant.SetAsyncValue('@dial_code',  this.state.dataSource.data.wallet_country.dial_code)
                      Constant.SetAsyncValue('@number_length', this.state.dataSource.data.number_length)
                     
                           
-               var county =     this.findArrayElementByTitle(CountriesList, this.state.dataSource.data.country.dial_code);
+               var county =     this.findArrayElementByTitle(CountriesList,this.state.dataSource.data.wallet_country.dial_code);
             //    console.log(county.isoCode)
                     
                Constant.SetAsyncValue('@dial_country',county.isoCode.toString())

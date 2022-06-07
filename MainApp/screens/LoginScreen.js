@@ -5,6 +5,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import Constant from "../components/Constant";
 import {connect} from "react-redux";
 import AsyncStorage from '@react-native-community/async-storage';
+import CountriesList from "../components/countries.json";
 
 
 import Icon from '../common/icons';
@@ -64,7 +65,7 @@ fetch(Constant.URL+Constant.LOGIN,{
       response.json())
     .then((result) => {
       
-        console.log("allrest",result);
+        // console.log("allrest",result);
 
         if(!result.error){
   this.setState({
@@ -91,15 +92,18 @@ fetch(Constant.URL+Constant.LOGIN,{
         //  Constant.SetAsyncValue('@getCurrency',this.state.dataSource.data.user.country.currency),
          Constant.SetAsyncValue('@getFrom', this.state.dataSource.data.user.wallet_country_id.toString()),
         //  Constant.SetAsyncValue('@profit_rate', this.state.dataSource.data.profit_rate)
-         Constant.SetAsyncValue('@dial_code', this.state.dataSource.data.user.dial_code)
+         Constant.SetAsyncValue('@dial_code', this.state.dataSource.data.user.wallet_country.dial_code)
          Constant.SetAsyncValue('@number_length', this.state.dataSource.data.user.number_length)
 
-        
+         var county =     this.findArrayElementByTitle(CountriesList, this.state.dataSource.data.user.wallet_country.dial_code);
+        //  Constant.SetAsyncValue('@dial_country',county.isoCode.toString())
+
+        console.log(county)
          
          //Get HOME DETAILS number_length
          try {
           console.log("-----77777777777777777------------------------");
-          console.log(this.state.dataSource.data.user.wallet_country_id);
+          // console.log(this.state.dataSource.data.user.wallet_country.dial_code);
        
 
         const headers = {
@@ -112,29 +116,21 @@ fetch(Constant.URL+Constant.LOGIN,{
         method: "GET",
         headers,
     }).then(response => response.json()).then((result) => {
-      console.log(result);
+      // console.log(result);
     
       this.props.getAgentCurrency(result.data[0])
       this.setState({ getCurrency: result.data[0], spinner: false });
 
    
 
-    console.log( "cuuuu" , result.data[0]);
+    // console.log( "cuuuu" , result.data[0]);
 
           const dataSource =  fetch(Constant.URL + Constant.getAgBal + "/" + result.data[0], {
                 method: "GET",
                 headers,
             }).then(response => response.json()).then((result) => {
       
-              // console.log("allrest",result.data);
-              console.log("***0************************************");
-           
-             
-              
-              // const dataSourc = await BalApiCall.json();
-
-            //  AsyncStorage.setItem('@wallet',result.data.customer_balance)
-          console.log(result);
+            
               this.props.getCustomerWallet(result.data.customer_balance)
               this.props.getAgentWallet(result.data.agent_balance)
               // this.props.getAgentCurrency(this.state.dataSource.data.user.country.currency)
@@ -143,9 +139,7 @@ fetch(Constant.URL+Constant.LOGIN,{
             });
 
           });
-          // const dataSource = await BalApiCall.json();
-          // console.log("-----------------------------");
-          // console.log(dataSource);
+        
         
       } catch (err) {
           console.log("Error fetching kdata-----------", err);
@@ -165,6 +159,8 @@ fetch(Constant.URL+Constant.LOGIN,{
       userInfo: this.state.dataSource.data.user,
       personal_info_id: this.state.dataSource.data.user.personal_info_id,
       getFrom: this.state.dataSource.data.user.wallet_country_id,
+      dial_country:  this.findArrayElementByTitle(CountriesList, this.state.dataSource.data.user.wallet_country.dial_code).toString()
+      
       
       
     });
@@ -183,6 +179,15 @@ fetch(Constant.URL+Constant.LOGIN,{
 //end post method
     }
   }
+
+  findArrayElementByTitle(array, title) {
+       
+    return array.find((element) => {
+       
+      return element.dialCode === title;
+    })
+  }
+
   
  
   onPressSignUp = () => {

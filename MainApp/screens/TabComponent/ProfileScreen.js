@@ -66,19 +66,19 @@ AsyncStorage.getAllKeys()
                                 </View>
                             </TouchableOpacity>
                         </View> */}
-                        {/* <View style={{ paddingLeft: 35, paddingVertical: 10, }}>
+                        <View style={{ paddingLeft: 35, paddingVertical: 10, }}>
                             <TouchableOpacity onPress={() => this.props.navigation.navigate("SwitchWallet",
                             { c_type: 1 }
                             )}>
                                 <View style={styles.settingLayout}>
                                     <View style={styles.settingNamesty}>
                                         <Icon family="FontAwesome" name="money" size={30} color={Theme.mainColor} />
-                                        <Text style={styles.meunSty}>Switch Wallet </Text>
+                                        <Text style={styles.meunSty}>Switch Country </Text>
                                     </View>
                                     <Icon family="MaterialIcons" name="keyboard-arrow-right" size={30} color="black" />
                                 </View>
                             </TouchableOpacity>
-                        </View> */}
+                        </View>
 
                         {/* <View style={{ paddingLeft: 35, paddingVertical: 10, }}>
                             <TouchableOpacity onPress={() => this.props.navigation.navigate("SwitchWallet",

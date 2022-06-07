@@ -1,14 +1,14 @@
 import React, { Component } from "react";
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, FlatList,StatusBar,Alert } from "react-native";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, FlatList,StatusBar } from "react-native";
+import LinearGradient from 'react-native-linear-gradient';
 import Icon from '../common/icons';
 import Theme from "../styles/Theme";
-
 import Spinner from 'react-native-loading-spinner-overlay';
 import Constant from "../components/Constant";
 import AsyncStorage from '@react-native-community/async-storage';
 
 
-export default class SwitchWallet extends Component {
+export default class CreditContacts extends Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -16,10 +16,27 @@ export default class SwitchWallet extends Component {
             spinner: true,
             personal_info_id:"",
             cus_img: "../assets/img/boy.png",
-            c_type : this.props.navigation.getParam('c_type', '0'),
-            
+            c_type : this.props.navigation.getParam('c_type', '8'),
+            text: '',
         }
+        this.arrayholder = [];
     }
+
+
+    SearchFilterFunction(text) {
+       
+        const newData = this.arrayholder.filter(function(item) {
+          //applying filter for the inserted text in search bar
+          const itemData = `${item.cus_name.toUpperCase()} ${item.cus_phone.toUpperCase()} `;
+          const textData = text.toUpperCase();
+          return itemData.indexOf(textData) > -1;
+        });
+
+        this.setState({
+          customerList: newData,
+          text: text,
+        });
+      }
 
     async componentDidMount() {
         this.setState({ personal_info_id: await AsyncStorage.getItem('@personal_info_id'),
@@ -27,6 +44,8 @@ export default class SwitchWallet extends Component {
         token: await AsyncStorage.getItem("@token"),
     }); 
        
+    console.log( this.props.navigation.getParam('date',''),);
+
         try {
 
             const headers = {
@@ -35,45 +54,44 @@ export default class SwitchWallet extends Component {
                 "Accept": "application/json",
             };
 
-   
-            const CustomerApiCall = await fetch(Constant.URL+Constant.getCOUNTRY,
+           
+  
+            const CustomerApiCall = await fetch(Constant.URL+Constant.getCUSTOMERS,
                 {
                     method: "GET",
                     headers,
                 });
             const getCustomer = await CustomerApiCall.json();
-            console.log(getCustomer)
-            this.setState({customerList: getCustomer.data, spinner: false});
+           
+            this.setState({customerList: getCustomer.data, spinner: false},
+                function() {
+                    this.arrayholder = getCustomer;
+                  } 
+                
+                );
         } catch(err) {
             console.log("Error fetching data-----------", err);
         }
     }
 
-
-
     _renderTransfer(rowdata) {
         return (
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate("SwitchWalletConfirm", {
-                country_id: rowdata.item.country_id,
-                currency: rowdata.item.currency,
-                country: rowdata.item.country,
-                // c_type:rowdata.item.dial_code
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate("CreditSaveContacts", {
+                cus_name: rowdata.item.cus_name,
+                cus_phone: rowdata.item.cus_phone,
+                customer_id: rowdata.item.customer_id,
+                currencyFrom: this.props.navigation.getParam('currencyFrom',''),
+            
               
               })} >
-                <View style={styles.transferbox}>
-                    <View style={styles.flexrow}>
+                <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row'}}>
                         <View style={styles.imgContainer}>
-                        <Icon family="FontAwesome" name="money"  size={22} />
+                            <Image style={styles.userimg} source={require('../assets/img/boy.png')} />
                         </View>
-                        <View style={styles.flexrow}>
-                            <View style={styles.userdetails}>
-                                <Text style={{fontSize: 13,color: '#000',fontFamily: 'Poppins-Light'}}>{rowdata.item.currency}</Text>
-                                <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Thin' }}>{rowdata.item.country}</Text>
-                            </View>
-                        </View>
-                        <View style={styles.paymentsty}>
-                           
-                            <Text style={styles.debited}>{rowdata.item.currencies.length}</Text>
+                        <View style={styles.userdetails}>
+                            <Text style={{ fontSize: 18, color: '#000',fontFamily: 'Poppins-Light' }}>{rowdata.item.cus_name}</Text>
+                            <Text style={{ fontSize: 10, color: '#000',fontFamily: 'Poppins-Thin' }}>{rowdata.item.cus_phone}</Text>
                         </View>
                     </View>
                 </View>
@@ -93,15 +111,17 @@ export default class SwitchWallet extends Component {
                     <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
                         <Icon family="MaterialIcons" name="arrow-back" size={25} color="#FFF" />
                     </TouchableOpacity>
-                    {this.state.c_type == 1 ? ( 
-        <Text style={styles.headTxt}>Switch Country </Text>
-        ): null}
-
-{this.state.c_type == 2 ? ( 
-        <Text style={styles.headTxt}>Activate Wallet </Text>
-        ): null}
+        <Text style={styles.headTxt}>Customers </Text>
                 </View>
-         
+                <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, margin: 15, paddingHorizontal: 15 }}>
+                        <Icon family="Feather" name="search" size={25} />
+                        <TextInput style={{ paddingLeft: 10, fontSize: 16 }}
+                           
+                            placeholder="Quick Search"
+                            onChangeText={text => this.SearchFilterFunction(text)}
+                            autoCorrect={false}  
+                        />
+                </View>
                 <ScrollView>
                     <FlatList
                         data={this.state.customerList}
@@ -114,10 +134,6 @@ export default class SwitchWallet extends Component {
 }
 
 const styles = StyleSheet.create({
-    flexrow: {
-        flex: 1,
-        flexDirection: 'row'
-    },
     headContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -138,12 +154,6 @@ const styles = StyleSheet.create({
         color: 'black',
         paddingLeft: 5,
     },
-    transferbox: {
-        flex: 1,
-        backgroundColor: 'white',
-        margin: 10,
-        borderRadius: 15
-    },
     imgContainer: {
         backgroundColor: "#fff",
         marginHorizontal: 10,
@@ -161,18 +171,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 1
     },
-    debited: {
-        fontSize: 10,
-        paddingVertical: 2,
-        color: 'green',
-        textAlign: 'center',
-        fontFamily:'Poppins-Regular'
-    },
-    amountSty:{ 
-        color: '#fcad50', 
-        fontSize: 20, 
-        fontFamily: 'Poppins-Light' 
-    },
     userimg: {
         width: 40,
         height: 40,
@@ -180,14 +178,9 @@ const styles = StyleSheet.create({
     },
     userdetails: {
         flex: 1,
-        flexDirection: "column",
-        justifyContent: 'center'
+        paddingLeft:10,
+        justifyContent: 'center',
+        borderBottomWidth: 1,
+        borderColor: 'lightgray'
     },
-    paymentsty: {
-        flex: 0.9,
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 10
-    }
-
 });

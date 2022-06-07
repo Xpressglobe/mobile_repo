@@ -48,44 +48,7 @@ export default class Users extends Component {
         dial_code_co: await AsyncStorage.getItem('@dial_country'),
         });
 
-    //    var codal = this.findArrayElementByTitle(CountriesList, this.state.dial_codee);
-    //     this.state.dial_code_co = codal;
-    //     console.log("NGGGG", this.state.dial_code_co.flag);
-
-        // try {
-
-        //     let token=   await AsyncStorage.getItem("@token");
-            
-        //     const headers = {
-        //         "Authorization": "Bearer "+ token,
-        //         "Content-Type": "application/json",
-        //         "Accept": "application/json",
-        //     };
-
-        //     const CountryApiCall = await fetch(Constant.URL + Constant.getCOUNTRY, {
-        //         method: "GET",
-        //         headers,
-        //     });
-
-        //     const getCountry = await CountryApiCall.json();
-        //      this.setState({ CountryList: getCountry.data, spinner: false });
-        // } catch (err) {
-        //     console.log("Error fetching data-----------", err);
-        // }
-
-        // //Get Country Details
-        // try {
-
-        //     const CountryApi = await fetch(Constant.URL + Constant.getCountryMain, {
-        //         method: "GET",
-        //         headers,
-        //     });
-        //     const getCountryN = await CountryApi.json();
-        //     console.log("CountryData", getCountryN.data.dial_code)
-        //     this.setState({ spinner: false ,dial_code:getCountryN.data.dial_code,number_length:getCountryN.data.number_length});
-        // } catch (err) {
-        //     console.log("Error fetching data-----------", err);
-        // }
+        console.log(this.state.dial_code)
     
     }
 
@@ -402,7 +365,7 @@ export default class Users extends Component {
                         </TouchableOpacity> }
 
                         {this.state.customer_id != '' && 
-                         <View style={{ flexDirection: 'row', alignItems: 'center', margin: 0,marginTop:2, paddingHorizontal: 1 }}>
+                         <View style={{ alignItems: 'center', margin: 0,marginTop:2, paddingHorizontal: 1 }}>
                          
                         <TouchableOpacity style={{ marginHorizontal: 10, paddingVertical: 20 }} onPress={this.onPressUpdateCustomer}>
                             <View style={styles.signContainer}>

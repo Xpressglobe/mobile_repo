@@ -20,6 +20,8 @@ export default class Send extends Component {
             cus_phone: this.props.navigation.getParam('cus_phone','phone'),
             customer_id: this.props.navigation.getParam('customer_id','0'),
             amount: this.props.navigation.getParam('amount','0'),
+            amount_real: this.props.navigation.getParam('amount_real','0'),
+            r_amount_real: this.props.navigation.getParam('r_amount_real','0'),
             percentage: this.props.navigation.getParam('percentage','0'),
             country_id_to: this.props.navigation.getParam('country_id_to','0'),
             currency_id: this.props.navigation.getParam('currency_id','0'),
@@ -30,7 +32,10 @@ export default class Send extends Component {
             cur_to: this.props.navigation.getParam('cur_to','0'),
              a_date: this.props.navigation.getParam('date',''),
             rate_type: this.props.navigation.getParam('cal_type','0'),
-            cc_type: this.props.navigation.getParam('cc_type','0'),
+            setting_type: this.props.navigation.getParam('setting_type','0'),
+
+            trans_type: this.props.navigation.getParam('trans_type','0'),
+            rate: this.props.navigation.getParam('rate','0'),
             // cur_to 
             pin: '',
             ModeOfPayment: [],
@@ -103,13 +108,12 @@ export default class Send extends Component {
 
         try {
 
-            const ModeofPaymentApiCall = await fetch(Constant.URL + "settings/modes-of-payment?country_id=" + this.state.country_id_to,
+            const ModeofPaymentApiCall = await fetch(Constant.URL + "settings/modes-of-payment?country_id=" + this.state.country_id_to + "&currency=" + this.state.cur_to + "&transaction_type=send",
             {
                 method: "GET",
                 headers,
             });
             const getMOP = await ModeofPaymentApiCall.json();
-            // console.log("getCountry",getCountry.data)
             this.setState({ModeOfPayment: getMOP.data,spinner: false});
         } catch (err) {
             console.log("Error fetching data-----------",err);
@@ -117,7 +121,7 @@ export default class Send extends Component {
 
         try {
 
-            const BenApiCall = await fetch(Constant.URL + "beneficiaries",
+            const BenApiCall = await fetch(Constant.URL + "beneficiaries?customer_id=" + this.state.customer_id,
             {
                 method: "GET",
                 headers,
@@ -266,21 +270,27 @@ export default class Send extends Component {
 
             var formdata = {
                 customer_id: this.state.customer_id,
-                country_id: this.state.getFrom,
-                country_id_to: this.state.country_id_to,
-                mode_of_payment_id: this.state.mop_id,
-                percent_setting_id: this.state.percent_setting_id,
-                rate_setting_id: this.state.rate_setting_id,
-                cur_from: this.state.currencyFrom,
-                cur_to:  this.state.cur_to,
-                amount: Constant.rawNumber(this.state.amount),
-                r_amount: this.state.r_bal,
-                charges:  this.state.percentage/100 * Constant.rawNumber(this.state.amount),
-                percentage: this.state.percentage,
-                beneficiary: ben_details,
-                a_date: this.state.a_date,
-                rate_type: this.state.rate_type,
-                pin: this.state.pin,
+                    agent_from: this.state.personal_info_id,
+                    country_id: this.state.getFrom,
+                    country_id_to: this.state.country_id_to,
+                    mode_of_payment_id: this.state.mop_id,
+                    percent_setting_id: this.state.percent_setting_id,
+                    rate_setting_id: this.state.rate_setting_id,
+                    cur_from: this.state.currencyFrom,
+                    cur_to:  this.state.cur_to,
+                    amount: (this.state.amount_real),
+                    r_amount: this.state.r_amount_real,
+                    charges:  this.state.percentage/100 * (this.state.amount_real),
+                    percentage: this.state.percentage,
+                    beneficiary: ben_details,
+                    a_date: this.state.a_date,
+                    rate_type: this.state.rate_type,
+                    pin: this.state.pin,
+
+                    rate: this.state.rate,
+                    second_rate: 0,
+                    setting_type: this.state.setting_type,
+                    transaction_type: this.state.trans_type,
             }
 
             console.log(formdata);
@@ -289,21 +299,27 @@ export default class Send extends Component {
                 method: 'POST',
                 body: JSON.stringify({
                     customer_id: this.state.customer_id,
+                    agent_from: this.state.personal_info_id,
                     country_id: this.state.getFrom,
                     country_id_to: this.state.country_id_to,
                     mode_of_payment_id: this.state.mop_id,
-                    percent_setting_id: this.state.percent_setting_id,
+                    // percent_setting_id: this.state.percent_setting_id,
                     rate_setting_id: this.state.rate_setting_id,
                     cur_from: this.state.currencyFrom,
                     cur_to:  this.state.cur_to,
-                    amount: Constant.rawNumber(this.state.amount),
-                    r_amount: this.state.r_bal,
-                    charges:  this.state.percentage/100 * Constant.rawNumber(this.state.amount),
-                    percentage: this.state.percentage,
+                    amount: (this.state.amount_real),
+                    r_amount: this.state.r_amount_real,
+                    charges:  this.state.percentage/100 * (this.state.amount_real),
+                    // percentage: this.state.percentage,
                     beneficiary: ben_details,
                     a_date: this.state.a_date,
                     rate_type: this.state.rate_type,
                     pin: this.state.pin,
+
+                    rate: this.state.rate,
+                    second_rate: 0,
+                    setting_type: this.state.setting_type,
+                    transaction_type: this.state.trans_type,
 
 
                     
@@ -350,7 +366,7 @@ console.log("result:", result);
                     console.log("-------- error ------- " + error);
                     alert("result:" + error)
                 });
-            //Get Rate
+            // Get Rate
 
 
 
@@ -398,12 +414,12 @@ console.log("result:", result);
                     <TouchableOpacity style={{flexDirection: 'row',alignItems: 'center',paddingLeft: 20,paddingTop: 10}} >
                          <View>
                             <Text style={{fontFamily: 'Poppins-Regular'}}>Amount to Send :</Text>
-                            <Text style={{fontSize: 20,color: '#000',fontFamily: 'Poppins-ExtraLight'}}> {this.state.getCurrency} : {Constant.numberFormate(Constant.rawNumber(this.state.amount))}</Text>
+                            <Text style={{fontSize: 20,color: '#000',fontFamily: 'Poppins-ExtraLight'}}> {this.state.getCurrency} : {Constant.numberFormate((this.state.amount_real))}</Text>
                         </View>
 
                         <View style={{paddingLeft: 40,paddingTop: 0}} >
                             <Text style={{fontFamily: 'Poppins-Regular'}}>Charges :</Text>
-                            <Text style={{fontSize: 20,color: '#000',fontFamily: 'Poppins-ExtraLight'}}> {this.state.getCurrency} : {this.state.percentage/100 * Constant.rawNumber(this.state.amount)}%  </Text>
+                            <Text style={{fontSize: 20,color: '#000',fontFamily: 'Poppins-ExtraLight'}}> {this.state.getCurrency} : {this.state.percentage/100 * Constant.rawNumber(this.state.amount)}  </Text>
                         </View>
                         
                     </TouchableOpacity>
@@ -411,7 +427,7 @@ console.log("result:", result);
                     <TouchableOpacity style={{flexDirection: 'row',alignItems: 'center',paddingLeft: 20,paddingTop: 10}} >
                          <View>
                             <Text style={{fontFamily: 'Poppins-Regular'}}>Amount to Send in  {this.state.cur_to} :</Text>
-                            <Text style={{fontSize: 20,color: '#000',fontFamily: 'Poppins-ExtraLight'}}> {this.state.cur_to} : {Constant.numberFormate(Constant.rawNumber(this.state.amount) * (this.state.cc_type==0 ? this.state.rate_setting : this.state.dollar_rate))}</Text>
+                            <Text style={{fontSize: 20,color: '#000',fontFamily: 'Poppins-ExtraLight'}}> {this.state.cur_to} : {Constant.numberFormate((this.state.r_amount_real))}</Text>
                         </View>
 
                       
@@ -754,7 +770,7 @@ value={this.state.ben_iban}
                          placeholder="Pin"
                         
                          secureTextEntry={true}
-                         maxLength={16}
+                         maxLength={4}
                          onChangeText={(pin)=>this.setState({pin})}
                          value={this.state.pin}
                          />

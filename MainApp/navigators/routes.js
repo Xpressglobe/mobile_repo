@@ -12,6 +12,8 @@ import HomeScreen from '../screens/TabComponent/HomeScreen';
 import RateCenter from '../screens/RateCenter';
 import Users from '../screens/Users';
 import Contacts from '../screens/Contacts';
+
+// import WalletList from '../screens/Wallet/WalletList';
 import CreditContacts from '../screens/CreditContacts';
 import CreditSaveContacts from '../screens/CreditSaveContacts';
 import AddRate from '../screens/AddRate';
@@ -171,6 +173,13 @@ const Routes = {
   },
 
   
+
+  // WalletList: {
+  //   screen: WalletList,
+  //   navigationOptions: {
+  //     header: null
+  //   },
+  // },
 
   CreditContacts: {
     screen: CreditContacts,
